@@ -1,5 +1,6 @@
 /* assets/css/styles.css
-   Updated CSS including shipment calculator UI
+   Complete styles for GreenWrite: header, hero, slides, products,
+   order form, modals, mobile menu, dark mode, responsive fixes.
 */
 
 /* ========== BASE ========== */
@@ -100,10 +101,6 @@ body.lock{overflow:hidden}
 .small{font-size:0.9rem;color:var(--muted)}
 .summary-box{margin-top:12px;padding:10px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.6)}
 
-/* ========== SHIPPING CALCULATOR PANEL ========== */
-.ship-calc{margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.04);font-size:0.95rem}
-.ship-calc .small{color:var(--muted)}
-
 /* ========== MODALS & LIGHTBOX ========== */
 .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:9999}
 .modal.show{display:flex}
@@ -123,7 +120,7 @@ body.lock{overflow:hidden}
 .fade-in{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease}
 .fade-in.show{opacity:1;transform:translateY(0)}
 
-/* ========== RESPONSIVE ========== */
+/* ========== RESPONSIVE FIXES ========== */
 img{max-width:100%;height:auto;display:block}
 html,body{overflow-x:hidden}
 @media (max-width:980px){
