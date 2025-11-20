@@ -376,7 +376,6 @@ function ensureShippingPanel(){
       `Total: ₹${order.total}`,
       `Note: ${order.note || '-'}`,
       "",
-      "Ordered via: Website created by Bharat — Team GreenWrite"
     ];
     const message = messageLines.join("\n");
 
@@ -516,3 +515,4 @@ document.addEventListener('keydown', e => {
 
 /* ================= IMAGE ERROR LOGGING ================= */
 (function imageWarnings(){ $$('img').forEach(img => img.addEventListener('error', () => console.warn('Image failed to load:', img.src))); })();
+
