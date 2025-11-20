@@ -33,7 +33,18 @@
       </nav>
 
       <div class="tools">
+        <!-- profile icon -->
+        <button id="profileBtn" class="icon-btn" aria-label="Profile / Login">👤</button>
+
+        <!-- cart icon -->
+        <button id="cartBtn" class="icon-btn" aria-label="View cart">
+          🛒 <span id="cartCount" class="cart-count">0</span>
+        </button>
+
+        <!-- dark mode -->
         <button id="darkToggle" class="icon-btn" aria-label="Toggle dark mode">🌓</button>
+
+        <!-- desktop floating WhatsApp -->
         <a id="waFloat" class="whats-float desktop-only" href="https://wa.me/584161689126" target="_blank" aria-label="WhatsApp">💬</a>
       </div>
     </div>
@@ -102,20 +113,22 @@
         <div class="prod fade-in">
           <img src="pen.jpg" alt="Plantable Pen">
           <h3>Plantable Pen</h3>
-          <p>• Price ₹15/ per unit</p>
+          <p>Cost to make: ₹5 • Price: ₹20</p>
           <div class="actions">
             <button class="view-btn" data-img="pen.jpg" aria-label="View pen image">VIEW IMAGE</button>
-            <button class="btn" data-name="Plantable Pen" data-price="20">BUY NOW</button>
+            <button class="btn secondary add-cart-btn" data-name="Plantable Pen" data-price="20">ADD TO CART</button>
+            <button class="btn buy-btn" data-name="Plantable Pen" data-price="20">BUY NOW</button>
           </div>
         </div>
 
         <div class="prod fade-in">
           <img src="pencil.jpg" alt="Plantable Pencil">
           <h3>Plantable Pencil</h3>
-          <p>• Price ₹15/ per unit</p>
+          <p>Cost to make: ₹4 • Price: ₹15</p>
           <div class="actions">
             <button class="view-btn" data-img="pencil.jpg" aria-label="View pencil image">VIEW IMAGE</button>
-            <button class="btn" data-name="Plantable Pencil" data-price="15">BUY NOW</button>
+            <button class="btn secondary add-cart-btn" data-name="Plantable Pencil" data-price="15">ADD TO CART</button>
+            <button class="btn buy-btn" data-name="Plantable Pencil" data-price="15">BUY NOW</button>
           </div>
         </div>
 
@@ -125,7 +138,8 @@
           <p>Pen + Pencil • Price: ₹30</p>
           <div class="actions">
             <button class="view-btn" data-img="pen.jpg" aria-label="View combo image">VIEW IMAGE</button>
-            <button class="btn" data-name="Combo Pack" data-price="30">BUY NOW</button>
+            <button class="btn secondary add-cart-btn" data-name="Combo Pack" data-price="30">ADD TO CART</button>
+            <button class="btn buy-btn" data-name="Combo Pack" data-price="30">BUY NOW</button>
           </div>
         </div>
       </div>
@@ -238,7 +252,7 @@
             <div style="flex:1"></div>
             <button class="btn" type="submit">Send via WhatsApp</button>
           </div>
-          <p class="small" style="margin-top:8px">You can preview the order summary and choose UPI or PayPal after confirming. (Payments are handled manually.)</p>
+          <p class="small" style="margin-top:8px">Free shipping above ₹500 (India) • Bulk 50+ packs free shipping.</p>
         </form>
       </div>
     </section>
@@ -261,7 +275,7 @@
     </footer>
   </main>
 
-  <!-- Lightbox (must match #lightbox and #lbimg used in JS) -->
+  <!-- Lightbox -->
   <div id="lightbox" class="lightbox" aria-hidden="true"><img id="lbimg" src="" alt="Large view"></div>
 
   <!-- ORDER MODAL -->
@@ -289,7 +303,7 @@
     </div>
   </div>
 
-  <!-- success modal -->
+  <!-- SUCCESS MODAL -->
   <div id="successModal" class="modal" aria-hidden="true">
     <div class="modal-card" style="text-align:center">
       <div class="success-check">✓</div>
@@ -299,16 +313,60 @@
     </div>
   </div>
 
+  <!-- AUTH / LOGIN MODAL -->
+  <div id="authModal" class="modal" aria-hidden="true">
+    <div class="modal-card auth-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Welcome to GreenWrite</h3>
+        <button id="authClose" style="background:#fff;border-radius:8px;padding:6px;border:0;cursor:pointer">✕</button>
+      </div>
+      <p style="color:var(--muted);margin-top:6px">Create a simple profile or continue as guest. (Demo login only for school project.)</p>
+
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+        <button id="authGoogle" class="btn" type="button">Continue with Google</button>
+        <button id="authPhone" class="btn secondary" type="button">Continue with Phone</button>
+      </div>
+
+      <div style="margin-top:10px">
+        <label for="authPhoneInput" class="small">Or enter phone number (demo)</label>
+        <input id="authPhoneInput" type="tel" placeholder="Enter phone number" style="width:100%;padding:8px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
+      </div>
+
+      <p class="small" style="margin-top:8px;color:var(--muted)">Note: This is a demo only. No real account is created.</p>
+
+      <div style="margin-top:10px;display:flex;justify-content:space-between;gap:8px;align-items:center">
+        <button id="authSkip" class="btn secondary" type="button">Skip for now</button>
+        <button id="authSave" class="btn" type="button">Save & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART MODAL -->
+  <div id="cartModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Your Cart</h3>
+        <button id="cartClose" style="background:#fff;border-radius:8px;padding:6px;border:0;cursor:pointer">✕</button>
+      </div>
+      <div id="cartItems" style="margin-top:10px;max-height:280px;overflow-y:auto"></div>
+      <div style="margin-top:10px;display:flex;justify-content:space-between;font-weight:700">
+        <span>Total</span><span>₹<span id="cartTotal">0</span></span>
+      </div>
+      <p class="small" style="margin-top:6px;color:var(--muted)">Tip: Use items from cart to auto-fill the order form.</p>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button id="cartUse" class="btn" type="button">Use in Order Form</button>
+        <button id="cartClear" class="btn secondary" type="button">Clear Cart</button>
+      </div>
+    </div>
+  </div>
+
   <!-- back to top -->
   <button id="topBtn" class="top-btn" aria-label="Back to top">↑</button>
 
-  <!-- ensure floating whatsapp exists (script will add if missing) -->
-  <a id="waFloat" class="whats-float" href="https://wa.me/584161689126" target="_blank" aria-label="WhatsApp">💬</a>
+  <!-- extra floating WhatsApp (mobile) -->
+  <a id="waFloatBottom" class="whats-float" href="https://wa.me/584161689126" target="_blank" aria-label="WhatsApp">💬</a>
 
   <!-- scripts -->
   <script src="assets/js/script.js"></script>
 </body>
 </html>
-
-
-
