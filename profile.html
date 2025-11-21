@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Profile — GreenWrite</title>
-  <meta name="description" content="GreenWrite profile — login or sign up with Google or Email/Password." />
+  <meta name="description" content="GreenWrite profile — login or sign up with Google or email & password." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
@@ -65,17 +65,17 @@
         <div class="card">
           <h2 class="headline">Profile & Login</h2>
           <p class="hero-lead">
-            Login or sign up with Google or Email &amp; Password.
-            Your profile is only used to auto-fill the GreenWrite order form in this browser.
+            Create a simple profile to save your details for GreenWrite orders.
+            You can log in with Google or your email & password.
           </p>
           <ul class="small">
-            <li>School project demo — no real payments.</li>
-            <li>You can log out any time from this page.</li>
+            <li>Made only for school project demo (no real payments).</li>
+            <li>You can always log out from this page.</li>
           </ul>
         </div>
 
         <aside class="hero-box">
-          <!-- JS builds login UI here -->
+          <!-- Profile root where JS will build the UI -->
           <div id="profileRoot" class="card" style="min-height:260px">
             <p class="small" style="color:var(--muted)">Loading profile...</p>
           </div>
@@ -87,8 +87,8 @@
       <div class="card">
         <h3>Why login?</h3>
         <ul>
-          <li>Auto-fill name and email on the order form.</li>
-          <li>Keep a history of your last orders (stored only in your browser).</li>
+          <li>Auto-fill name and phone in the order form.</li>
+          <li>See a history of your last orders (stored in your browser only).</li>
           <li>Completely optional — you can still order as a guest.</li>
         </ul>
       </div>
@@ -105,7 +105,6 @@
 
   <!-- Main shared JS (header, dark mode, etc.) -->
   <script src="assets/js/script.js"></script>
-
   <!-- Profile / Firebase auth (module) -->
   <script type="module" src="assets/js/profile.js"></script>
 </body>
