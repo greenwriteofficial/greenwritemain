@@ -1,29 +1,20 @@
 /* assets/js/profile.js
-   Firebase Auth (Google + Phone) ONLY for profile.html
-
-   - On real Firebase setup: uses real Google + Phone (SMS OTP)
-   - If phone auth / billing is NOT enabled:
-       -> automatic DEMO OTP mode (code shown on screen, no SMS)
-   - Stores minimal profile in localStorage for order auto-fill
+   Firebase Auth (Google + Email/Password) ONLY for profile.html
+   - NO phone / OTP (so no billing required)
+   - Uses modern modular Firebase SDK (CDN)
+   - Saves basic profile to localStorage for order auto-fill
 */
 
-/* ---------- Only run on profile.html ---------- */
-const isProfilePage = window.location.pathname.endsWith("profile.html");
-if (!isProfilePage) {
-  console.log("profile.js: not profile.html, skipping auth UI");
-}
-
-/* ---------- Firebase imports (modular via CDN) ---------- */
+/* ---------- Firebase imports (CDN modules) ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
-  signOut,
-  signInAnonymously
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 /* ---------- Your Firebase config ---------- */
@@ -37,50 +28,48 @@ const firebaseConfig = {
   measurementId: "G-2192KW3Y9J"
 };
 
-const app  = initializeApp(firebaseConfig);
+/* ---------- Init Firebase ---------- */
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 auth.languageCode = "en";
 
 const $ = (sel) => document.querySelector(sel);
 
-/* ========= DEMO / FALLBACK FLAGS ========= */
-let recaptchaVerifier = null;
-let confirmationResult = null;
-let useDemoOtp = false;      // true when phone auth is not enabled / billing issue
-let demoOtpCode = null;      // generated demo OTP
-let lastPhoneNumber = "";    // phone entered by user
-
-/* ========= RENDER UI ========= */
+/* ---------- Render UI ---------- */
 
 function renderLoggedOut() {
   const root = $("#profileRoot");
   if (!root) return;
+
   root.innerHTML = `
     <h3 style="margin-top:0">Login or Sign up</h3>
     <p class="small" style="color:var(--muted)">
-      Use Google or your phone number to create a simple profile. This is only for demo and order auto-fill.
+      Use Google or your email & password to create a simple profile.
+      This is only for school project demo and order auto-fill.
     </p>
 
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+      <!-- Google login -->
       <button id="btnGoogle" class="btn" type="button">Continue with Google</button>
 
+      <!-- Email / password login + signup -->
       <div class="card" style="margin-top:6px;padding:10px;border-radius:10px">
-        <label class="small" for="phoneInput">Login with phone (with country code)</label>
-        <input id="phoneInput" type="tel" placeholder="+91 98765 43210"
+        <label class="small" for="emailInput">Email</label>
+        <input id="emailInput" type="email" placeholder="you@example.com"
                style="width:100%;padding:8px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
-        <button id="btnSendOtp" class="btn secondary" type="button" style="margin-top:6px">Send OTP</button>
 
-        <div id="otpArea" style="display:none;margin-top:8px">
-          <label class="small" for="otpInput">Enter OTP</label>
-          <input id="otpInput" type="text" placeholder="123456"
-                 style="width:100%;padding:8px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
-          <button id="btnVerifyOtp" class="btn" type="button" style="margin-top:6px">Verify & Login</button>
+        <label class="small" for="passwordInput" style="margin-top:8px;display:block">Password (min 6 characters)</label>
+        <input id="passwordInput" type="password" placeholder="Enter password"
+               style="width:100%;padding:8px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
+
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button id="btnEmailLogin" class="btn secondary" type="button">Login</button>
+          <button id="btnEmailSignup" class="btn" type="button">Sign up</button>
         </div>
-        <div id="phoneMsg" class="small" style="margin-top:6px;color:var(--muted)"></div>
+
+        <div id="emailMsg" class="small" style="margin-top:6px;color:var(--muted)"></div>
       </div>
     </div>
-
-    <div id="recaptcha-container" style="margin-top:10px"></div>
   `;
 
   attachLoggedOutHandlers();
@@ -90,39 +79,23 @@ function renderLoggedIn(user) {
   const root = $("#profileRoot");
   if (!root) return;
 
-  // read any saved profile (for phone/override)
-  let stored = null;
-  try {
-    stored = JSON.parse(localStorage.getItem("greenwrite_profile") || "null");
-  } catch (e) {}
-
-  const name =
-    user.displayName ||
-    (stored && stored.name) ||
-    "GreenWrite user";
-  const email =
-    user.email ||
-    (stored && stored.email) ||
-    "Not set";
-  const phone =
-    user.phoneNumber ||
-    (stored && stored.phone) ||
-    "Not set";
+  const name = user.displayName || "GreenWrite user";
+  const email = user.email || "Not set";
 
   root.innerHTML = `
     <h3 style="margin-top:0">Welcome, ${escapeHtml(name)}</h3>
     <p class="small" style="color:var(--muted)">
-      You are logged in. We will use this info to auto-fill the order form on the website (in this browser only).
+      You are logged in. We will use this info to auto-fill the order form
+      on the website (in this browser only).
     </p>
 
     <div class="card" style="margin-top:10px;padding:10px;border-radius:10px">
       <p><strong>Name:</strong> ${escapeHtml(name)}</p>
       <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-      <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
     </div>
 
     <p class="small" style="margin-top:8px">
-      Tip: Go to the home page order form. Your name, phone and email can be auto-filled using this profile.
+      Tip: Go to the home page order form. Your name and email can be auto-filled using this profile.
     </p>
 
     <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
@@ -131,12 +104,11 @@ function renderLoggedIn(user) {
     </div>
   `;
 
-  // merge & save minimal profile in localStorage
+  // store minimal profile in localStorage (for order form auto-fill on other pages)
   try {
     const mini = {
       name,
-      email: email === "Not set" ? "" : email,
-      phone: phone === "Not set" ? "" : phone
+      email: user.email || ""
     };
     localStorage.setItem("greenwrite_profile", JSON.stringify(mini));
   } catch (e) {
@@ -157,42 +129,27 @@ function renderLoggedIn(user) {
     });
 }
 
-/* ---------- Escape helper ---------- */
+/* ---------- Helpers ---------- */
 function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, (s) =>
-    ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    }[s])
-  );
+  return String(str).replace(/[&<>"']/g, (s) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[s]));
 }
 
-/* ---------- reCAPTCHA setup ---------- */
-function setupRecaptcha() {
-  if (recaptchaVerifier) return recaptchaVerifier;
-  recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-    size: "invisible",
-    callback: () => {
-      console.log("reCAPTCHA solved");
-    }
-  });
-  return recaptchaVerifier;
-}
-
-/* ---------- Handlers when logged out ---------- */
+/* ---------- Logged out handlers (Google + Email/Password) ---------- */
 function attachLoggedOutHandlers() {
   const btnGoogle = $("#btnGoogle");
-  const btnSendOtp = $("#btnSendOtp");
-  const btnVerifyOtp = $("#btnVerifyOtp");
-  const phoneInput = $("#phoneInput");
-  const otpArea = $("#otpArea");
-  const otpInput = $("#otpInput");
-  const phoneMsg = $("#phoneMsg");
+  const btnEmailLogin = $("#btnEmailLogin");
+  const btnEmailSignup = $("#btnEmailSignup");
+  const emailInput = $("#emailInput");
+  const passwordInput = $("#passwordInput");
+  const emailMsg = $("#emailMsg");
 
-  // Google Login
+  // Google sign-in
   if (btnGoogle) {
     btnGoogle.addEventListener("click", async () => {
       try {
@@ -200,113 +157,75 @@ function attachLoggedOutHandlers() {
         await signInWithPopup(auth, provider);
       } catch (err) {
         console.error(err);
-        alert("Google login failed. (Check console for details.)");
+        alert("Google login failed. Check console for details.");
       }
     });
   }
 
-  // Send OTP (SMS or DEMO)
-  if (btnSendOtp && phoneInput) {
-    btnSendOtp.addEventListener("click", async () => {
-      const phone = phoneInput.value.trim();
-      lastPhoneNumber = phone;
-      if (!phone) {
-        phoneMsg.textContent = "Enter phone number with country code (e.g., +91 ...).";
+  // Email/password login
+  if (btnEmailLogin && emailInput && passwordInput) {
+    btnEmailLogin.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const pass = passwordInput.value;
+
+      if (!email || !pass) {
+        emailMsg.textContent = "Enter both email and password.";
         return;
       }
-      phoneMsg.textContent = "Sending OTP...";
-      useDemoOtp = false;
-      demoOtpCode = null;
 
+      emailMsg.textContent = "Logging in...";
       try {
-        const verifier = setupRecaptcha();
-        confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
-        otpArea.style.display = "block";
-        phoneMsg.textContent = "OTP sent. Please check your phone.";
+        await signInWithEmailAndPassword(auth, email, pass);
+        emailMsg.textContent = "";
       } catch (err) {
         console.error(err);
-
-        // If billing/phone auth not enabled, use DEMO OTP instead
-        const msg = String(err.message || "");
-        const code = err.code || "";
-
-        if (
-          code === "auth/billing-not-enabled" ||
-          code === "auth/operation-not-allowed" ||
-          msg.toLowerCase().includes("phone auth is not enabled") ||
-          msg.toLowerCase().includes("must enable billing")
-        ) {
-          useDemoOtp = true;
-          demoOtpCode = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit
-          otpArea.style.display = "block";
-          phoneMsg.innerHTML =
-            "Phone auth / billing is not enabled on this Firebase project, " +
-            "so we are using <strong>DEMO OTP mode</strong> for your school project.<br>" +
-            `Demo OTP: <strong>${demoOtpCode}</strong> (enter this to login)`;
+        if (err.code === "auth/user-not-found") {
+          emailMsg.textContent = "No account found. Use Sign up.";
+        } else if (err.code === "auth/wrong-password") {
+          emailMsg.textContent = "Wrong password. Try again.";
         } else {
-          phoneMsg.textContent = "Failed to send OTP. Check number and try again.";
+          emailMsg.textContent = "Login failed: " + (err.message || err.code);
         }
       }
     });
   }
 
-  // Verify OTP
-  if (btnVerifyOtp && otpInput) {
-    btnVerifyOtp.addEventListener("click", async () => {
-      const code = otpInput.value.trim();
-      if (!code) return;
+  // Email/password signup
+  if (btnEmailSignup && emailInput && passwordInput) {
+    btnEmailSignup.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const pass = passwordInput.value;
 
-      // DEMO MODE
-      if (useDemoOtp) {
-        if (code !== demoOtpCode) {
-          phoneMsg.textContent = "Invalid demo OTP. Check and try again.";
-          return;
-        }
-        phoneMsg.textContent = "OTP verified (demo). Logging you in...";
-        try {
-          // Anonymous sign-in to have a Firebase user (no billing needed)
-          await signInAnonymously(auth);
-          // Save phone in localStorage profile
-          try {
-            const current = JSON.parse(localStorage.getItem("greenwrite_profile") || "null") || {};
-            current.phone = lastPhoneNumber;
-            if (!current.name) current.name = "GreenWrite user";
-            if (!current.email) current.email = "";
-            localStorage.setItem("greenwrite_profile", JSON.stringify(current));
-          } catch (e) {
-            console.warn("Could not save demo phone profile", e);
-          }
-        } catch (err) {
-          console.error(err);
-          phoneMsg.textContent = "Demo login failed. Please try again.";
-        }
+      if (!email || !pass) {
+        emailMsg.textContent = "Enter both email and password.";
+        return;
+      }
+      if (pass.length < 6) {
+        emailMsg.textContent = "Password must be at least 6 characters.";
         return;
       }
 
-      // REAL SMS MODE
-      if (!confirmationResult) {
-        phoneMsg.textContent = "Please request OTP again.";
-        return;
-      }
+      emailMsg.textContent = "Creating account...";
       try {
-        phoneMsg.textContent = "Verifying...";
-        await confirmationResult.confirm(code);
-        phoneMsg.textContent = "Phone verified!";
+        await createUserWithEmailAndPassword(auth, email, pass);
+        emailMsg.textContent = "Account created! You are now logged in.";
       } catch (err) {
         console.error(err);
-        phoneMsg.textContent = "Invalid OTP. Please try again.";
+        if (err.code === "auth/email-already-in-use") {
+          emailMsg.textContent = "Email already in use. Try Login instead.";
+        } else {
+          emailMsg.textContent = "Sign up failed: " + (err.message || err.code);
+        }
       }
     });
   }
 }
 
 /* ---------- Auth state listener ---------- */
-if (isProfilePage) {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      renderLoggedIn(user);
-    } else {
-      renderLoggedOut();
-    }
-  });
-}
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    renderLoggedIn(user);
+  } else {
+    renderLoggedOut();
+  }
+});
