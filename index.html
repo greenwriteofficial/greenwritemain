@@ -30,6 +30,7 @@
         <a href="products.html">Products</a>
         <a href="gallery.html">Gallery</a>
         <a href="contact.html">Contact</a>
+        <a href="profile.html">Profile</a>
       </nav>
 
       <div class="tools">
@@ -321,33 +322,49 @@
     </div>
   </div>
 
-  <!-- AUTH / LOGIN MODAL -->
+    <!-- AUTH / LOGIN / PROFILE MODAL -->
   <div id="authModal" class="modal" aria-hidden="true">
     <div class="modal-card auth-card">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <h3 style="margin:0">Welcome to GreenWrite</h3>
         <button id="authClose" style="background:#fff;border-radius:8px;padding:6px;border:0;cursor:pointer">✕</button>
       </div>
-      <p style="color:var(--muted);margin-top:6px">Create a simple profile or continue as guest. (Demo login only for school project.)</p>
 
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+      <!-- status text: changes when logged in -->
+      <p id="authStatus" style="color:var(--muted);margin-top:6px">
+        Create a simple profile or continue as guest. (Real login using Google or Phone.)
+      </p>
+
+      <!-- LOGIN BUTTONS (hidden when logged in) -->
+      <div id="authLoginButtons" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
         <button id="authGoogle" class="btn" type="button">Continue with Google</button>
-        <button id="authPhone" class="btn secondary" type="button">Continue with Phone</button>
+        <button id="authPhone" class="btn secondary" type="button">Continue with Phone (OTP)</button>
       </div>
 
+      <!-- PHONE INPUT / OTP FIELD -->
       <div style="margin-top:10px">
-        <label for="authPhoneInput" class="small">Or enter phone number (demo)</label>
-        <input id="authPhoneInput" type="tel" placeholder="Enter phone number" style="width:100%;padding:8px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
+        <label for="authPhoneInput" class="small">Phone login (with country code, e.g. +91…)</label>
+        <input id="authPhoneInput" type="tel"
+               placeholder="Enter phone number with country code"
+               style="width:100%;padding:8px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
       </div>
 
-      <p class="small" style="margin-top:8px;color:var(--muted)">Note: This is a demo only. No real account is created.</p>
+      <!-- Invisible reCAPTCHA container for Firebase phone auth -->
+      <div id="recaptcha-container" style="margin-top:8px;"></div>
 
-      <div style="margin-top:10px;display:flex;justify-content:space-between;gap:8px;align-items:center">
-        <button id="authSkip" class="btn secondary" type="button">Skip for now</button>
+      <!-- FOOTER BUTTONS -->
+      <div style="margin-top:12px;display:flex;justify-content:space-between;gap:8px;align-items:center">
+        <button id="authSkip" class="btn secondary" type="button">Close</button>
         <button id="authSave" class="btn" type="button">Save & Continue</button>
+      </div>
+
+      <!-- LOGOUT BUTTON (only visible when logged in) -->
+      <div style="margin-top:10px;text-align:right">
+        <button id="logoutBtn" class="btn secondary" type="button" style="display:none">Log out</button>
       </div>
     </div>
   </div>
+
 
   <!-- CART MODAL -->
   <div id="cartModal" class="modal" aria-hidden="true">
@@ -382,4 +399,3 @@
   <script src="assets/js/script.js"></script>
 </body>
 </html>
-
