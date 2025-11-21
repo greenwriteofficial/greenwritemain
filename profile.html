@@ -4,145 +4,131 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Profile — GreenWrite</title>
+  <meta name="description" content="GreenWrite profile — Login and manage your account." />
+  <meta name="theme-color" content="#2e7d32" />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
-  <!-- Simple header (you can copy your main header if you want same look) -->
+  <!-- Header (same style as index) -->
   <header class="site-header">
     <div class="header-inner container">
       <div class="brand">
+        <button id="menuBtn" class="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span class="hb-bar"></span><span class="hb-bar"></span><span class="hb-bar"></span>
+        </button>
+
         <img src="logo.png" alt="GreenWrite logo" class="brand-logo" />
         <div>
           <h1 class="site-title">GreenWrite</h1>
-          <div class="tagline">Your Profile</div>
+          <div class="tagline">Plantable Pens & Pencils — <span id="typedTextSmall">Write your future.</span><span class="typed-cursor"></span></div>
         </div>
       </div>
 
-      <nav class="main-nav">
+      <nav class="main-nav" aria-label="Main navigation">
         <a href="index.html">Home</a>
+        <a href="about.html">About</a>
         <a href="products.html">Products</a>
         <a href="gallery.html">Gallery</a>
         <a href="contact.html">Contact</a>
+        <a href="profile.html">Profile</a>
       </nav>
+
+      <div class="tools">
+        <!-- you can hide profile icon here if you want, but it's okay to keep -->
+        <button id="profileBtn" class="icon-btn" aria-label="Profile">👤</button>
+        <button id="cartBtn" class="icon-btn" aria-label="View cart">
+          🛒 <span id="cartCount" class="cart-count">0</span>
+        </button>
+        <button id="darkToggle" class="icon-btn" aria-label="Toggle dark mode">🌓</button>
+        <a id="waFloat" class="whats-float desktop-only" href="https://wa.me/584161689126" target="_blank" aria-label="WhatsApp">💬</a>
+      </div>
+    </div>
+
+    <!-- mobile slide-in menu -->
+    <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+      <div class="mobile-menu-inner">
+        <nav class="mobile-nav" aria-label="Mobile navigation">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="products.html">Products</a>
+          <a href="gallery.html">Gallery</a>
+          <a href="contact.html">Contact</a>
+          <a href="profile.html">Profile</a>
+        </nav>
+        <div class="mobile-actions">
+          <button id="mobileDarkToggle" class="btn secondary">Toggle Dark</button>
+          <a href="https://wa.me/584161689126" class="btn" target="_blank">WhatsApp</a>
+        </div>
+      </div>
     </div>
   </header>
 
+  <!-- Main content -->
   <main class="container">
-    <section class="card fade-in" style="max-width:520px;margin:26px auto">
-      <h2 style="margin-top:0">Profile</h2>
-      <p id="statusText" class="small" style="margin-top:4px;color:var(--muted)">
-        Checking login status…
+    <section class="card fade-in" style="max-width:640px;margin:24px auto">
+      <h2>Profile / Login</h2>
+      <p class="small" style="margin-top:6px">
+        Sign in with Google or your phone number.
       </p>
 
-      <div style="display:flex;align-items:center;gap:14px;margin-top:14px">
-        <div id="profilePhotoWrap"
-             style="width:72px;height:72px;border-radius:50%;overflow:hidden;background:#e0f2e0;display:flex;align-items:center;justify-content:center;font-size:32px;">
-          <span id="profileInitial">?</span>
-          <img id="profilePhoto" src="" alt="Profile photo"
-               style="display:none;width:100%;height:100%;object-fit:cover" />
-        </div>
+      <!-- Status text -->
+      <p id="authStatus" class="small" style="margin-top:8px;color:var(--muted)">
+        Not logged in.
+      </p>
+
+      <!-- Login / signup box -->
+      <div id="loginBox" style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+        <button id="googleBtn" class="btn" type="button">Continue with Google</button>
+
+        <div style="border-top:1px solid rgba(0,0,0,0.06);margin:8px 0"></div>
 
         <div>
-          <div><strong>Name:</strong> <span id="profileName">—</span></div>
-          <div><strong>Email:</strong> <span id="profileEmail">—</span></div>
-          <div><strong>Phone:</strong> <span id="profilePhone">—</span></div>
+          <label class="small" for="phoneInput">Phone number (with country code, e.g. +91…)</label>
+          <input id="phoneInput" type="tel" placeholder="+91 XXXXXXXXX" style="width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
+          <button id="sendOtpBtn" class="btn secondary" type="button" style="margin-top:8px;width:100%">Send OTP</button>
         </div>
+
+        <div id="otpBox" style="display:none">
+          <label class="small" for="otpInput">Enter OTP</label>
+          <input id="otpInput" type="text" placeholder="6-digit code" style="width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px solid #dcdcdc" />
+          <button id="verifyOtpBtn" class="btn" type="button" style="margin-top:8px;width:100%">Verify OTP</button>
+        </div>
+
+        <!-- reCAPTCHA container required by Firebase phone auth -->
+        <div id="recaptcha-container" style="margin-top:8px;font-size:0.8rem;color:var(--muted)"></div>
       </div>
 
-      <div style="margin-top:18px;padding:10px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.6)">
-        <p class="small" style="margin:0">
-          You have been logged in ✅<br/>
-          Use this page to confirm your details or log out from GreenWrite.
-        </p>
+      <!-- Logged-in user info -->
+      <div id="userBox" style="display:none;margin-top:16px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06)">
+        <h3 style="margin:0 0 6px">Your Profile</h3>
+        <p class="small"><strong>Name:</strong> <span id="uName">-</span></p>
+        <p class="small"><strong>Email:</strong> <span id="uEmail">-</span></p>
+        <p class="small"><strong>Phone:</strong> <span id="uPhone">-</span></p>
+        <p class="small" style="word-break:break-all"><strong>UID:</strong> <span id="uUid">-</span></p>
+
+        <button id="logoutBtn" class="btn secondary" type="button" style="margin-top:10px">Log out</button>
       </div>
 
-      <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
-        <button id="backHome" class="btn secondary" type="button">← Back to Home</button>
-        <div style="flex:1"></div>
-        <button id="logoutBtn" class="btn" type="button">Log out</button>
-      </div>
+      <!-- Error box -->
+      <p id="authError" class="small" style="margin-top:10px;color:#b00020;display:none"></p>
     </section>
+
+    <footer style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <p style="color:var(--muted)">Made by Team GreenWrite — Class 11. Write your future. Grow your planet.</p>
+      <p style="margin:0;font-size:0.95rem;color:var(--muted)">Website created by <strong>Bharat</strong> — Team GreenWrite</p>
+    </footer>
   </main>
 
-  <!-- Firebase + profile logic -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  <!-- back to top -->
+  <button id="topBtn" class="top-btn" aria-label="Back to top">↑</button>
 
-    // Your Firebase config (same as index.html)
-    const firebaseConfig = {
-      apiKey: "AIzaSyBok3WdamaRJaVCzznMwB-lwHVWoHAM2i4",
-      authDomain: "greenwrite-704d9.firebaseapp.com",
-      projectId: "greenwrite-704d9",
-      storageBucket: "greenwrite-704d9.firebasestorage.app",
-      messagingSenderId: "815467329176",
-      appId: "1:815467329176:web:d7d767409867d2c2eb82ed",
-      measurementId: "G-2192KW3Y9J"
-    };
+  <!-- floating WhatsApp -->
+  <a id="waFloatBottom" class="whats-float" href="https://wa.me/584161689126" target="_blank" aria-label="WhatsApp">💬</a>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  <!-- shared UI script (header, dark mode, etc.) -->
+  <script src="assets/js/script.js"></script>
 
-    const statusText = document.getElementById("statusText");
-    const nameEl = document.getElementById("profileName");
-    const emailEl = document.getElementById("profileEmail");
-    const phoneEl = document.getElementById("profilePhone");
-    const photo = document.getElementById("profilePhoto");
-    const photoWrap = document.getElementById("profilePhotoWrap");
-    const initialEl = document.getElementById("profileInitial");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const backHome = document.getElementById("backHome");
-
-    // If user is not logged in, send them back to home
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        statusText.textContent = "You are not logged in. Redirecting to home…";
-        setTimeout(() => { window.location.href = "index.html"; }, 1600);
-        return;
-      }
-
-      // Logged in ✅
-      statusText.textContent = "You have been logged in ✅";
-
-      const displayName = user.displayName || "GreenWrite User";
-      const email = user.email || "-";
-      const phoneFromFirebase = user.phoneNumber || "";
-      const phoneFromLocal = localStorage.getItem("gw_profile_phone") || "";
-      const finalPhone = phoneFromFirebase || phoneFromLocal || "-";
-
-      nameEl.textContent = displayName;
-      emailEl.textContent = email;
-      phoneEl.textContent = finalPhone;
-
-      // Show avatar / initial
-      if (user.photoURL) {
-        photo.src = user.photoURL;
-        photo.style.display = "block";
-        initialEl.style.display = "none";
-      } else {
-        photo.style.display = "none";
-        const firstLetter = displayName.trim().charAt(0).toUpperCase() || "G";
-        initialEl.textContent = firstLetter;
-        initialEl.style.display = "block";
-      }
-    });
-
-    // Logout button
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        localStorage.removeItem("gw_profile_phone");
-        alert("You have been logged out.");
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error(err);
-        alert("Could not log out, please try again.");
-      }
-    });
-
-    backHome.addEventListener("click", () => {
-      window.location.href = "index.html";
-    });
-  </script>
+  <!-- Firebase Auth for this page -->
+  <script type="module" src="assets/js/profile.js"></script>
 </body>
 </html>
